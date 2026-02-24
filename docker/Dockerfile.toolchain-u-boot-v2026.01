@@ -1,0 +1,19 @@
+FROM debian:bookworm-20260112
+
+#
+# U-Boot v2026.01 build dependencies: https://docs.u-boot.org/en/v2026.01/build/gcc.html
+#
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    bc bison build-essential \
+    device-tree-compiler dfu-util efitools flex gdisk graphviz imagemagick \
+    libgnutls28-dev libguestfs-tools libncurses-dev \
+    libpython3-dev libsdl2-dev libssl-dev lz4 lzma lzma-alone openssl \
+    pkg-config python3 python3-asteval python3-coverage python3-filelock \
+    python3-pkg-resources python3-pycryptodome python3-pyelftools \
+    python3-pytest python3-pytest-xdist python3-sphinxcontrib.apidoc \
+    python3-sphinx-rtd-theme python3-subunit python3-testtools \
+    python3-venv swig uuid-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /u-boot

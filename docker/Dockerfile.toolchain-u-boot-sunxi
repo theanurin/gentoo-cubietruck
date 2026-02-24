@@ -1,0 +1,15 @@
+FROM arm32v7/debian:jessie-20210326
+
+RUN echo 'deb [trusted=yes] http://archive.debian.org/debian/ jessie main contrib non-free' > /etc/apt/sources.list \
+ && echo 'deb [trusted=yes] http://archive.debian.org/debian-security jessie/updates main' >> /etc/apt/sources.list
+
+RUN apt-get update -o Acquire::AllowInsecureRepositories=true \
+ && apt-get install -y --no-install-recommends \
+    build-essential gcc-4.9 g++-4.9 git bison flex libssl-dev u-boot-tools device-tree-compiler ca-certificates \
+ && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 50 \
+ && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 50 \
+ && update-alternatives --set gcc /usr/bin/gcc-4.9 \
+ && update-alternatives --set g++ /usr/bin/g++-4.9 \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /u-boot

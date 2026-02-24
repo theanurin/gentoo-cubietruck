@@ -1,0 +1,9 @@
+[submodule "submodules/sunxi-tools"]
+	path = submodules/sunxi-tools
+	url = https://github.com/linux-sunxi/sunxi-tools.git
+[submodule "submodules/u-boot-sunxi"]
+	path = submodules/u-boot-sunxi
+	url = https://github.com/linux-sunxi/u-boot-sunxi.git
+[submodule "submodules/u-boot"]
+	path = submodules/u-boot
+	url = https://github.com/u-boot/u-boot.git
