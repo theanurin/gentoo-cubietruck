@@ -16,4 +16,4 @@ RUN apt-get update \
     python3-venv swig uuid-dev \
   && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /u-boot
+WORKDIR /gentoo-cubietruck

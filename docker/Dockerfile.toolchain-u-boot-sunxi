@@ -12,4 +12,4 @@ RUN apt-get update -o Acquire::AllowInsecureRepositories=true \
  && update-alternatives --set g++ /usr/bin/g++-4.9 \
  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /u-boot
+WORKDIR /gentoo-cubietruck
