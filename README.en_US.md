@@ -33,8 +33,13 @@ make Cubietruck_defconfig
 #
 # Or
 #
-../../u-boot-script/sata-config.sh
-BOOTCOMMAND=$(cat ../../u-boot-script/sata.ubootcmd          | grep -v '^#' | tr -d '\n' | tr -s ' ' | sed 's/"/\\\\"/g')
+../../u-boot-script/mmc-config.sh
+BOOTCOMMAND=$(cat ../../u-boot-script/mmc.ubootcmd           | grep -v '^#' | tr -d '\n' | tr -s ' ' | sed 's/"/\\\\"/g')
+#
+# Or
+#
+../../u-boot-script/scsi-config.sh
+BOOTCOMMAND=$(cat ../../u-boot-script/scsi.ubootcmd          | grep -v '^#' | tr -d '\n' | tr -s ' ' | sed 's/"/\\\\"/g')
 #
 # Or
 #

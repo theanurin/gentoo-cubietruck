@@ -1,9 +1,9 @@
 #!/bin/sh
 #
 
-./scripts/config --file .config --enable   "ARM_SMCCC"
 ./scripts/config --file .config --disable  "ANDROID_BOOT_IMAGE"
 ./scripts/config --file .config --disable  "ARM_SMCCC_FEATURES"
+./scripts/config --file .config --enable   "ARM_SMCCC"
 ./scripts/config --file .config --set-val  "BOOTDELAY" "0"
 ./scripts/config --file .config --disable  "BOOTDEV_ETH"
 ./scripts/config --file .config --disable  "BOOTMETH_EXTLINUX"
@@ -17,7 +17,6 @@
 ./scripts/config --file .config --disable  "CMD_BOOTFLOW"
 ./scripts/config --file .config --disable  "CMD_HVC"
 ./scripts/config --file .config --enable   "CMD_PAUSE"
-./scripts/config --file .config --enable   "CMD_SATA"
 ./scripts/config --file .config --enable   "CMD_SLEEP"
 ./scripts/config --file .config --disable  "CMD_SMC"
 ./scripts/config --file .config --disable  "EFI_LOADER"
