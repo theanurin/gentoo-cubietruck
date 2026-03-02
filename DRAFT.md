@@ -112,7 +112,7 @@ if dhcp; then
         setexpr filesize ${filesize} + 9;
         env import -t 0x44000000 ${filesize} bootargs;
         echo "Trying to load kernel image from OS For Dev web server...";
-        if wget ${kernel_addr_r} ${baseurl}/vmlinuz; then
+        if wget ${kernel_addr_r} ${baseurl}/zImage; then
             echo "Kernel image was load successfully from OS For Dev web server.";
             echo "Trying to load FDT file from OS For Dev web server...";
             if wget ${fdt_addr_r} ${baseurl}/${fdtfile}; then
@@ -163,9 +163,9 @@ else
   setenv bootpart 1
 fi
 
-setenv  bootargs console=ttyS0,115200 console=tty0 panic=10 rootfstype=ext4 rootflags=discard root=/dev/sda3 rootwait
+setenv  bootargs console=ttyS0,115200 console=tty0 panic=10 rootfstype=ext4 rootflags=discard root=/dev/sda3 rootwait=30
 
-if load ${devtype} ${devnum}:${bootpart} ${kernel_addr_r} /vmlinuz; then
+if load ${devtype} ${devnum}:${bootpart} ${kernel_addr_r} /zImage; then
   if load ${devtype} ${devnum}:${bootpart} ${fdt_addr_r} /dtbs/${fdtfile}; then
     if load ${devtype} ${devnum}:${bootpart} ${ramdisk_addr_r} /initramfs-linux.img; then
       bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r};
@@ -217,7 +217,7 @@ cp /cache/u-boot/u-boot-sunxi-with-spl.bin /build/u-boot-sunxi-with-spl.bin
 cat <<'EOF' > /build/boot.cmd
 setenv bootargs console=ttyS0,115200 console=tty0 earlyprintk panic=10 ${extra}
 load ${devtype} ${devnum}:${distro_bootpart} ${fdt_addr_r} /${fdtfile}
-load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} /vmlinuz
+load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} /zImage
 load ${devtype} ${devnum}:${distro_bootpart} ${ramdisk_addr_r} /initramfs.cpio.gz
 bootz ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r}
 EOF
@@ -241,7 +241,7 @@ docker run --rm --interactive --tty \
 
 cd /usr/src/linux-6.12.41-gentoo/
 make "-j$(nproc)"
-cp arch/arm/boot/zImage                                  /data-result/vmlinuz
+cp arch/arm/boot/zImage                                  /data-result/zImage
 cp arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dtb  /data-result/sun7i-a20-cubietruck.dtb
 ```
 
@@ -255,7 +255,7 @@ cp arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dtb  /data-result/sun7i-a20-
 
 
 
-CONFIG_BOOTCOMMAND="mw.b 0x44000000 0x62 1;mw.b 0x44000001 0x6F 1;mw.b 0x44000002 0x6F 1;mw.b 0x44000003 0x74 1;mw.b 0x44000004 0x61 1;mw.b 0x44000005 0x72 1;mw.b 0x44000006 0x67 1;mw.b 0x44000007 0x73 1;mw.b 0x44000008 0x3D 1;if test -n \"${distro_bootpart}\"; then setenv bootpart \"${distro_bootpart}\";else setenv bootpart 1;fi;echo \"Trying to load from boot partition...\";if load ${devtype} ${devnum}:${bootpart} 0x44000009 /cmdline; then echo \"Kernel command line was load successfully from boot partition.\"; setexpr filesize ${filesize} + 9; env import -t 0x44000000 ${filesize} bootargs; sleep 60; reset;else echo \"Kernel command line was NOT load from boot partition.\";fi;echo \"Trying to load from OS For Dev web server...\";dhcp;setenv baseurl http://dl.zxteam.net/osfordev/boot/armv7l/cubietruck;if wget 0x44000009 ${baseurl}/cmdline; then echo \"Kernel command line was load successfully from OS For Dev web server.\"; setexpr filesize ${filesize} + 9; env import -t 0x44000000 ${filesize} bootargs; wget ${kernel_addr_r} ${baseurl}/vmlinuz; wget ${fdt_addr_r} ${baseurl}/${fdtfile}; bootz ${kernel_addr_r} - ${fdt_addr_r};else echo \"Kernel command line was NOT load from OS For Dev web server.\";fi;"
+CONFIG_BOOTCOMMAND="mw.b 0x44000000 0x62 1;mw.b 0x44000001 0x6F 1;mw.b 0x44000002 0x6F 1;mw.b 0x44000003 0x74 1;mw.b 0x44000004 0x61 1;mw.b 0x44000005 0x72 1;mw.b 0x44000006 0x67 1;mw.b 0x44000007 0x73 1;mw.b 0x44000008 0x3D 1;if test -n \"${distro_bootpart}\"; then setenv bootpart \"${distro_bootpart}\";else setenv bootpart 1;fi;echo \"Trying to load from boot partition...\";if load ${devtype} ${devnum}:${bootpart} 0x44000009 /cmdline; then echo \"Kernel command line was load successfully from boot partition.\"; setexpr filesize ${filesize} + 9; env import -t 0x44000000 ${filesize} bootargs; sleep 60; reset;else echo \"Kernel command line was NOT load from boot partition.\";fi;echo \"Trying to load from OS For Dev web server...\";dhcp;setenv baseurl http://dl.zxteam.net/osfordev/boot/armv7l/cubietruck;if wget 0x44000009 ${baseurl}/cmdline; then echo \"Kernel command line was load successfully from OS For Dev web server.\"; setexpr filesize ${filesize} + 9; env import -t 0x44000000 ${filesize} bootargs; wget ${kernel_addr_r} ${baseurl}/zImage; wget ${fdt_addr_r} ${baseurl}/${fdtfile}; bootz ${kernel_addr_r} - ${fdt_addr_r};else echo \"Kernel command line was NOT load from OS For Dev web server.\";fi;"
 
 
 
