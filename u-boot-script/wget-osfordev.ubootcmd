@@ -7,7 +7,7 @@ gpio clear 235;
 gpio clear 244;
 gpio set 245;
 
-#setenv baseurl http://192.168.254.20;
+#setenv baseurl http://192.168.254.20:8000;
 setenv baseurl http://dl.zxteam.net/osfordev/boot/armv7l/cubietruck/latest;
 
 echo "baseurl: ${baseurl}";
