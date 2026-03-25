@@ -1,3 +1,4 @@
 resources/*.img
 
+.build/
 .DS_Store
