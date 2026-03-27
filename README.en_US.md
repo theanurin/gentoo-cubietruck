@@ -144,9 +144,6 @@ sed --in-place '/gpio = <&pio 7 12 GPIO_ACTIVE_HIGH>;/a \\tregulator-boot-on;\n\
 sed --in-place '/target-supply = <&reg_ahci_5v>;/a \\tahci-supply = <&reg_ahci_5v>;\n\tphy-supply = <&reg_ahci_5v>;' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
 sed --in-place '/pinctrl-0 = <&clk_out_a_pin>;/a \\tvcc-pa-supply = <&reg_vcc3v3>;\n\tvcc-pb-supply = <&reg_vcc3v3>;\n\tvcc-pf-supply = <&reg_vcc3v3>;\n\tvcc-ph-supply = <&reg_vcc3v3>;\n\tvcc-pi-supply = <&reg_vcc3v3>;' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
 
-# Setup clock frequency 24MHz (required to use legacy NAND U-Boot)
-sed --in-place 's~compatible = "arm,armv7-timer";~compatible = "arm,armv7-timer"; clock-frequency = <24000000>;~g' arch/arm/boot/dts/allwinner/sun7i-a20.dtsi
-
 # Optional LED configuration
 sed --in-place 's~label = "cubietruck:blue:usr";~label = "cubietruck:blue:usr"; default-state = "on";~g' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
 sed --in-place 's~label = "cubietruck:orange:usr";~label = "cubietruck:orange:usr"; default-state = "off"; linux,default-trigger = "heartbeat";~g' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
@@ -158,7 +155,6 @@ cat arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts | grep -A4 -B1 'target-
 cat arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts | grep -A4 -B1 'gpio = <&pio 7 12 GPIO_ACTIVE_HIGH>;'
 cat arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts | grep -A7 -B2 'pinctrl-0 = <&clk_out_a_pin>;'
 cat arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts | grep 'label = "cubietruck:'
-cat arch/arm/boot/dts/allwinner/sun7i-a20.dtsi | grep 'compatible = "arm,armv7-timer";'
 ```
 
 ### General Configuration
@@ -174,13 +170,12 @@ make oldconfig
 
 ### Alternative configuration
 
-Alternatively you may use predefined config from [OS For Dev repo](https://github.com/osfordev/gentoo-overlay/tree/master/profiles/cubietruck)
+Alternatively you may use predefined config from [OS For Dev repo](https://github.com/osfordev/gentoo-overlay/tree/dev/profiles/cubietruck)
 
 ```shell
 KERNEL_VERSION=6.17.13
 
-wget --output-document="${KCONFIG_CONFIG}" "https://raw.githubusercontent.com/osfordev/gentoo-overlay/refs/heads/master/profiles/cubietru
-ck/config-${KERNEL_VERSION}-gentoo-cubietruck"
+wget --output-document="${KCONFIG_CONFIG}" "https://raw.githubusercontent.com/osfordev/gentoo-overlay/refs/heads/dev/profiles/cubietruck/config-${KERNEL_VERSION}-gentoo-cubietruck"
 ```
 
 ### Build for SD card boot
@@ -200,17 +195,9 @@ cp --dereference "${KBUILD_OUTPUT}/System.map" "/data/.build/${KERNEL_VERSION}/b
 
 ### Build for boot via legacy U-Boot (NAND)
 
-1. Setup clock frequency `clock-frequency = <24000000>` (see Kernel Patching section)
-1. Update kernel config
-    ```shell
-    ./scripts/config --file "${KCONFIG_CONFIG}" --enable   "ARM_APPENDED_DTB"
-    ./scripts/config --file "${KCONFIG_CONFIG}" --enable   "ARM_ATAG_DTB_COMPAT"
-    ./scripts/config --file "${KCONFIG_CONFIG}" --enable   "ARM_ATAG_DTB_COMPAT_CMDLINE_EXTEND"
-    make oldconfig
-    ```
+!!! [NOTE] In this setup only 1 CPU is available. No-luck with second CPU, due to `All CPU(s) started in SVC mode` instead `All CPU(s) started in HYP mode.`.
 
-    To enable debug messages you may want `DEBUG_LL`, `DEBUG_SUNXI_UART0`, `DEBUG_UART_8250`, `EARLY_PRINTK`
-1. Install U-Boot ools
+1. Install U-Boot tools
     ```shell
     # If you need uImage
     emerge-webrsync
@@ -218,6 +205,23 @@ cp --dereference "${KBUILD_OUTPUT}/System.map" "/data/.build/${KERNEL_VERSION}/b
     emerge --ask dev-embedded/u-boot-tools
     export KCONFIG_CONFIG="/kernel-build-cache/.config"
     ```
+1. Setup clock frequency `clock-frequency = <24000000>` (required to use legacy NAND U-Boot)
+    ```shell
+    sed --in-place 's~compatible = "arm,armv7-timer";~compatible = "arm,armv7-timer"; clock-frequency = <24000000>;~g' arch/arm/boot/dts/allwinner/sun7i-a20.dtsi
+    cat arch/arm/boot/dts/allwinner/sun7i-a20.dtsi | grep 'compatible = "arm,armv7-timer";'
+    ```
+1. ... `enable-method = "allwinner,sun7i-a20-smp"; in arch/arm/boot/dts/allwinner/sun7i-a20.dtsi
+enable-method = "allwinner,sun7i-a20-mc-smp";
+1. Update kernel config
+    ```shell
+    ./scripts/config --file "${KCONFIG_CONFIG}" --enable   "ARM_APPENDED_DTB"
+    ./scripts/config --file "${KCONFIG_CONFIG}" --enable   "ARM_ATAG_DTB_COMPAT"
+    ./scripts/config --file "${KCONFIG_CONFIG}" --disable  "ARM_ATAG_DTB_COMPAT_CMDLINE_FROM_BOOTLOADER"
+    ./scripts/config --file "${KCONFIG_CONFIG}" --enable   "ARM_ATAG_DTB_COMPAT_CMDLINE_EXTEND"
+    make oldconfig
+    ```
+
+    To enable debug messages you may want `DEBUG_LL`, `DEBUG_SUNXI_UART0`, `DEBUG_UART_8250`, `EARLY_PRINTK`
 1. Build
     ```shell
     make --jobs=$(nproc) zImage modules dtbs
@@ -229,9 +233,7 @@ cp --dereference "${KBUILD_OUTPUT}/System.map" "/data/.build/${KERNEL_VERSION}/b
     (cd "/data/.build/${KERNEL_VERSION}" && tar -czvpf "modules-${KERNEL_VERSION}-gentoo-cubietruck.tar.gz" "lib/modules/${KERNEL_VERSION}-gentoo-cubietruck")
 
     mkdir --parents "/data/.build/${KERNEL_VERSION}/boot"
-    cp --dereference "${KBUILD_OUTPUT}/arch/arm/boot/zImage" "/data/.build/${KERNEL_VERSION}/boot/zImage-${KERNEL_VERSION}-gentoo-cubietruck"
     cp --dereference "${KBUILD_OUTPUT}/arch/arm/boot/uImage" "/data/.build/${KERNEL_VERSION}/boot/uImage-${KERNEL_VERSION}-gentoo-cubietruck"
-    cp --dereference "${KBUILD_OUTPUT}/arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dtb" "/data/.build/${KERNEL_VERSION}/boot/sun7i-a20-cubietruck-${KERNEL_VERSION}-gentoo.dtb"
     cp --dereference "${KCONFIG_CONFIG}" "/data/.build/${KERNEL_VERSION}/boot/config-${KERNEL_VERSION}-gentoo-cubietruck"
     cp --dereference "${KBUILD_OUTPUT}/System.map" "/data/.build/${KERNEL_VERSION}/boot/System-${KERNEL_VERSION}-gentoo-cubietruck.map"
     ```
