@@ -139,17 +139,21 @@ docker run --rm --interactive --tty --platform linux/arm/v7 \
 ### Kernel Patching
 
 ```shell
+#
+# Patch kernel DTS
+#
 # Fix kernel errors: supply xxxx not found, using dummy regulator
-sed --in-place '/gpio = <&pio 7 12 GPIO_ACTIVE_HIGH>;/a \\tregulator-boot-on;\n\tregulator-always-on;' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
-sed --in-place '/target-supply = <&reg_ahci_5v>;/a \\tahci-supply = <&reg_ahci_5v>;\n\tphy-supply = <&reg_ahci_5v>;' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
-sed --in-place '/pinctrl-0 = <&clk_out_a_pin>;/a \\tvcc-pa-supply = <&reg_vcc3v3>;\n\tvcc-pb-supply = <&reg_vcc3v3>;\n\tvcc-pf-supply = <&reg_vcc3v3>;\n\tvcc-ph-supply = <&reg_vcc3v3>;\n\tvcc-pi-supply = <&reg_vcc3v3>;' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
-
-# Optional LED configuration
-sed --in-place 's~label = "cubietruck:blue:usr";~label = "cubietruck:blue:usr"; default-state = "on";~g' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
-sed --in-place 's~label = "cubietruck:orange:usr";~label = "cubietruck:orange:usr"; default-state = "off"; linux,default-trigger = "heartbeat";~g' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
-sed --in-place 's~label = "cubietruck:white:usr";~label = "cubietruck:white:usr"; default-state = "off"; linux,default-trigger = "heartbeat";~g' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
-sed --in-place 's~label = "cubietruck:green:usr";~label = "cubietruck:green:usr"; default-state = "off"; linux,default-trigger = "heartbeat";~g' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
-
+#
+sed --in-place '/\tgpio = <&pio 7 12 GPIO_ACTIVE_HIGH>;/a \\tregulator-boot-on;\n\tregulator-always-on;' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
+sed --in-place '/\ttarget-supply = <&reg_ahci_5v>;/a \\tahci-supply = <&reg_ahci_5v>;\n\tphy-supply = <&reg_ahci_5v>;' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
+sed --in-place '/\tpinctrl-0 = <&clk_out_a_pin>;/a \\tvcc-pa-supply = <&reg_vcc3v3>;\n\tvcc-pb-supply = <&reg_vcc3v3>;\n\tvcc-pf-supply = <&reg_vcc3v3>;\n\tvcc-ph-supply = <&reg_vcc3v3>;\n\tvcc-pi-supply = <&reg_vcc3v3>;' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
+#
+# LED configuration
+#
+sed --in-place 's~\t\t\tlabel = "cubietruck:blue:usr";~\t\t\tlabel = "cubietruck:blue:usr"; default-state = "on";~g' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
+sed --in-place 's~\t\t\tlabel = "cubietruck:orange:usr";~\t\t\tlabel = "cubietruck:orange:usr"; default-state = "off"; linux,default-trigger = "heartbeat";~g' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
+sed --in-place 's~\t\t\tlabel = "cubietruck:white:usr";~\t\t\tlabel = "cubietruck:white:usr"; default-state = "off"; linux,default-trigger = "heartbeat";~g' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
+sed --in-place 's~\t\t\tlabel = "cubietruck:green:usr";~\t\t\tlabel = "cubietruck:green:usr"; default-state = "off"; linux,default-trigger = "heartbeat";~g' arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts
 # Double check
 cat arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts | grep -A4 -B1 'target-supply = <&reg_ahci_5v>;'
 cat arch/arm/boot/dts/allwinner/sun7i-a20-cubietruck.dts | grep -A4 -B1 'gpio = <&pio 7 12 GPIO_ACTIVE_HIGH>;'
